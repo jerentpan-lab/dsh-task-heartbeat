@@ -1,0 +1,37 @@
+{
+  "name": "dsh-task-heartbeat",
+  "version": "0.1.1",
+  "description": "Task heartbeat for DeepSeek Harness: register long tasks, beat progress, and detect stalls instead of mere liveness.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "tasks",
+    "watchdog",
+    "heartbeat"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jerentpan-lab/dsh-task-heartbeat.git"
+  }
+}

@@ -1,0 +1,5 @@
+# dsh-task-heartbeat bundle patch: mounts the plugin into a dsh profile.
+# Install: dsh plugin --profile <name> add dsh-task-heartbeat
+- insert:
+    - id: dsh-task-heartbeat
+      name: dsh-task-heartbeat
