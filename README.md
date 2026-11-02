@@ -1,5 +1,10 @@
 # dsh-task-heartbeat
 
+[![npm version](https://img.shields.io/npm/v/dsh-task-heartbeat)](https://www.npmjs.com/package/dsh-task-heartbeat) [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+> Author: jetpan (npm) ↔ jerentpan-lab (GitHub) | [npm package](https://www.npmjs.com/package/dsh-task-heartbeat) | [GitHub repo](https://github.com/jerentpan-lab/dsh-task-heartbeat) | install from GitHub: `dsh plugin --profile web add github:jerentpan-lab/dsh-task-heartbeat`
+
+
 Watch task **progress**, not process liveness. Register long tasks, beat after each
 meaningful step, and get a stalled list when the last beat is older than `ttl_s`.
 

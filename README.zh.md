@@ -1,5 +1,10 @@
 # dsh-task-heartbeat（任务进展心跳）
 
+[![npm version](https://img.shields.io/npm/v/dsh-task-heartbeat)](https://www.npmjs.com/package/dsh-task-heartbeat) [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+> 作者：jetpan（npm）↔ jerentpan-lab（GitHub）｜[npm 包](https://www.npmjs.com/package/dsh-task-heartbeat)｜[GitHub 仓库](https://github.com/jerentpan-lab/dsh-task-heartbeat)｜也可从 GitHub 安装：`dsh plugin --profile web add github:jerentpan-lab/dsh-task-heartbeat`
+
+
 盯着「任务有没有推进」，而不是「进程还活着」。登记长任务，每完成一步 beat 一次；
 超过 `ttl_s` 没有 beat 就当停滞。
 

@@ -1,6 +1,6 @@
 {
   "name": "dsh-task-heartbeat",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Task heartbeat for DeepSeek Harness: register long tasks, beat progress, and detect stalls instead of mere liveness.",
   "type": "module",
   "main": "src/index.js",
@@ -32,6 +32,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jerentpan-lab/dsh-task-heartbeat.git"
+    "url": "git+https://github.com/jerentpan-lab/dsh-task-heartbeat.git"
+  },
+  "author": {
+    "name": "jetpan (jerentpan-lab)",
+    "email": "jerentpan@gmail.com",
+    "url": "https://github.com/jerentpan-lab"
+  },
+  "homepage": "https://github.com/jerentpan-lab/dsh-task-heartbeat#readme",
+  "bugs": {
+    "url": "https://github.com/jerentpan-lab/dsh-task-heartbeat/issues"
   }
 }
