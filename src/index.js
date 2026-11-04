@@ -6,6 +6,7 @@
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { DEFAULT_TTL_S, TaskStore } from './core.js';
+import { validateConfig } from './config.js';
 
 export const name = 'dsh-task-heartbeat';
 export const inject = ['tools'];
@@ -21,7 +22,8 @@ try {
   degraded = true;
 }
 
-export function apply(ctx, config = {}) {
+export function apply(ctx, rawConfig = {}) {
+  const { config } = validateConfig(rawConfig);
   const stateFile =
     config.stateFile || process.env.DSH_TASK_HEARTBEAT_FILE || join(homedir(), '.dsh', 'task-heartbeat.json');
   const store = new TaskStore(stateFile);
@@ -45,7 +47,7 @@ export function apply(ctx, config = {}) {
       },
       output: out,
       async execute(args = {}) {
-        return store.register(args);
+        return store.register({ ttlS: config.defaultTtlS, ...args });
       },
     })
   );
@@ -104,5 +106,5 @@ export function apply(ctx, config = {}) {
     })
   );
 
-  return { store, stateFile, degraded };
+  return { store, stateFile, degraded, config };
 }

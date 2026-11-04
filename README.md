@@ -33,14 +33,16 @@ PY
 - `task_list`
 - `task_done { taskId }`
 
-## Config
+## Config (0.2.0)
 
-```yaml
-- id: dsh-task-heartbeat
-  name: dsh-task-heartbeat
-  config:
-    stateFile: "/absolute/path/tasks.json"
+```json
+{ "stateFile": "~/.dsh/task-heartbeat.json", "defaultTtlS": 900 }
 ```
+
+- `stateFile`: heartbeat state file (default `~/.dsh/task-heartbeat.json`, env `DSH_TASK_HEARTBEAT_FILE`).
+- `defaultTtlS`: default stall threshold for `task_register` when `ttlS` is omitted.
+- Unknown keys / invalid values throw a readable `ConfigError`.
+- Example: `config.example.json`. Run `npm run verify` for tests + pack checks.
 
 ## License
 
