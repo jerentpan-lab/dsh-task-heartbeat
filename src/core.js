@@ -77,7 +77,20 @@ export class TaskStore {
     this.lockStaleMs = options.lockStaleMs ?? 30_000;
     this.lockRetries = options.lockRetries ?? 100;
     this.mutex = new Mutex();
-    this.warnings = { corrupted: null, clockSkew: [] };
+    this.warnings = { corrupted: null, clockSkew: [], clockRollbackMs: 0 };
+    this.lastSeenMs = 0;
+  }
+
+  /** Monotonic-ish clock: never go backwards vs the last observed time (B1). */
+  _now() {
+    const raw = this.now();
+    const last = this.lastSeenMs || 0;
+    if (raw < last) {
+      this.warnings.clockRollbackMs = Math.max(this.warnings.clockRollbackMs, last - raw);
+      return last;
+    }
+    this.lastSeenMs = raw;
+    return raw;
   }
 
   async _acquireLock() {
@@ -142,8 +155,11 @@ export class TaskStore {
       this.warnings.corrupted = { backup, error: 'state root is not a JSON object' };
       return { tasks: {}, corrupt: this.warnings.corrupted };
     }
+    const persisted = Number(parsed._lastSeenMs);
+    if (Number.isFinite(persisted) && persisted > this.lastSeenMs) this.lastSeenMs = persisted;
     const tasks = Object.create(null);
     for (const [k, v] of Object.entries(parsed)) {
+      if (k === '_lastSeenMs') continue;
       if (!TASK_ID_RE.test(k) || !v || typeof v !== 'object') continue;
       tasks[k] = Object.assign(Object.create(null), v);
     }
@@ -153,7 +169,7 @@ export class TaskStore {
   async _writeState(tasks) {
     const plain = {};
     for (const k of Object.keys(tasks)) plain[k] = tasks[k];
-    await atomicWrite(this.file, plain);
+    await atomicWrite(this.file, { ...plain, _lastSeenMs: this.lastSeenMs });
   }
 
   async load() {
@@ -171,7 +187,7 @@ export class TaskStore {
       if (existing && existing.status !== 'done' && !force) {
         throw new Error(`register: task ${id} is already running (use force:true to restart)`);
       }
-      const ts = nowIso(this.now());
+      const ts = nowIso(this._now());
       tasks[id] = Object.assign(Object.create(null), {
         taskId: id,
         owner: String(owner),
@@ -198,7 +214,7 @@ export class TaskStore {
       const task = tasks[id];
       if (!task) throw new Error(`beat: unknown taskId ${id}`);
       if (task.status === 'done' && !reopen) throw new Error(`beat: task ${id} is already done (use reopen:true)`);
-      task.lastBeat = nowIso(this.now());
+      task.lastBeat = nowIso(this._now());
       task.beats = (task.beats || 0) + 1;
       task.status = 'running';
       task.stalledAt = null;
@@ -216,7 +232,7 @@ export class TaskStore {
       if (!task) throw new Error(`done: unknown taskId ${id}`);
       if (task.status !== 'done') {
         task.status = 'done';
-        task.lastBeat = nowIso(this.now());
+        task.lastBeat = nowIso(this._now());
         task.stalledAt = null;
         await this._writeState(tasks);
       }
@@ -235,7 +251,7 @@ export class TaskStore {
   async check() {
     return this._withLock(async () => {
       const { tasks } = await this._readState();
-      const now = this.now();
+      const now = this._now();
       const stalled = [];
       const skew = [];
       let changed = false;
@@ -251,7 +267,10 @@ export class TaskStore {
         if (ageS > (task.ttlS || DEFAULT_TTL_S)) {
           if (!task.stalledAt) { task.stalledAt = nowIso(now); changed = true; }
           const stalledForS = Math.floor((now - parseIsoStrict(task.stalledAt)) / 1000);
-          stalled.push({ ...task, stalled_s: ageS, stalledFor_s: stalledForS });
+          const ttlForScore = task.ttlS || DEFAULT_TTL_S;
+          const stallScore = Math.min(100, Math.round((stalledForS / ttlForScore) * 100));
+          const stallGrade = stallScore >= 75 ? 'critical' : stallScore >= 50 ? 'high' : stallScore >= 25 ? 'warn' : 'watch';
+          stalled.push({ ...task, stalled_s: ageS, stalledFor_s: stalledForS, stall_score: stallScore, stall_grade: stallGrade });
         }
       }
       if (changed) await this._writeState(tasks);

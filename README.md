@@ -44,6 +44,36 @@ PY
 - Unknown keys / invalid values throw a readable `ConfigError`.
 - Example: `config.example.json`. Run `npm run verify` for tests + pack checks.
 
+## Demo
+
+```bash
+node examples/demo.mjs
+```
+
+## Bench
+
+`node bench/bench.mjs` writes `bench/RESULTS.md`. Each beat is a durable fsync'ed write (~97ms/beat on this host); use `task_beat` at your task's natural cadence.
+
+## Troubleshooting (error table)
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `ConfigError ... unknown key` | typo/unsupported config key | use `config.example.json` |
+| `ConfigError ... defaultTtlS` | not a finite number > 0 | use seconds, e.g. 900 |
+| `taskId must match ...` | illegal id characters | `[A-Za-z0-9_-]{1,64}` only |
+| `register: owner is required` | missing owner | pass `owner` |
+| `register: task ... already running` | duplicate live task | use `force:true` to restart |
+| `ttlS must be a positive finite number` | bad ttl | pass seconds > 0 |
+| `could not acquire lock ...` | another process holds the lock >30s | retry; check for stale lock file |
+| `state corrupt` warning | JSON unreadable | corrupt file quarantined (`*.corrupt-*`), tools keep working |
+| `clockRollbackMs` warning | wall clock went backwards | monotonic clamp keeps ages non-negative |
+
+## Verify
+
+```bash
+npm run verify
+```
+
 ## License
 
 MIT

@@ -1,6 +1,6 @@
 {
   "name": "dsh-task-heartbeat",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Task heartbeat for DeepSeek Harness: register long tasks, beat progress, and detect stalls instead of mere liveness.",
   "type": "module",
   "main": "src/index.js",
@@ -13,7 +13,8 @@
     "README.md",
     "README.zh.md",
     "LICENSE",
-    "config.example.json"
+    "config.example.json",
+    "examples"
   ],
   "keywords": [
     "dsh",
